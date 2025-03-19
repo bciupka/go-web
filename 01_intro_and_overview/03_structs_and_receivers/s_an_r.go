@@ -4,8 +4,8 @@ import "fmt"
 
 type User struct {
 	FirstName string
-	LastName string
-	Age int
+	LastName  string
+	Age       int
 }
 
 func (u *User) DoubleAge() {
@@ -13,17 +13,17 @@ func (u *User) DoubleAge() {
 }
 
 func main() {
-	user := User {
+	user := User{
 		FirstName: "Bartek",
-		LastName: "C",
+		LastName:  "C",
 	}
 
 	fmt.Println(user.FirstName, user.LastName, user.Age)
 
 	user2 := User{
 		FirstName: "Aga",
-		LastName: "D",
-		Age: 28,
+		LastName:  "D",
+		Age:       28,
 	}
 
 	fmt.Println(user2.FirstName, user2.LastName, user2.Age)

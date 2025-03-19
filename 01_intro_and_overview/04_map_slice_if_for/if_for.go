@@ -50,5 +50,5 @@ func main() {
 
 	for i, s := range stringyy {
 		fmt.Println(i, s)
-	} 
+	}
 }

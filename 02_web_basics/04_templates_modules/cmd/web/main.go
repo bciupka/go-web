@@ -2,16 +2,33 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/config"
 	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/handlers"
+	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/render"
 )
 
 const port = ":8080"
 
 func main() {
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+	var app config.AppConfig
+
+	tc, err := render.CreateCacheForTemplates()
+	if err != nil {
+		log.Fatal("Cannot create template cache")
+	}
+	app.TemplateCache = tc
+	app.UseCache = false
+
+	render.NewTemplates(&app)
+
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 
 	fmt.Println("Server starting on port", port)
 	http.ListenAndServe(port, nil)

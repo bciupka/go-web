@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+
+	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/config"
+	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/models"
 )
 
 // no cache
@@ -64,11 +67,28 @@ func createCachedTemplate(t string) error {
 
 // advanced caching
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	tc, err := createCacheForTemplates()
-	if err != nil {
-		log.Fatal(err)
-		return
+var app *config.AppConfig
+
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+	var tc map[string]*template.Template
+	var err error
+
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, err = CreateCacheForTemplates()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 	}
 
 	t, ok := tc[tmpl]
@@ -79,7 +99,9 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 	buf := new(bytes.Buffer)
 
-	err = t.Execute(buf, nil)
+	td = AddDefaultData(td)
+
+	err = t.Execute(buf, td)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -91,7 +113,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 }
 
-func createCacheForTemplates() (map[string]*template.Template, error) {
+func CreateCacheForTemplates() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	pages, err := filepath.Glob("./templates/*.page.tmpl")

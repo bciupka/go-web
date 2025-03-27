@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/config"
 	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/handlers"
 	"github.com/bciupka/go-mod/02_web_basics/04_templates_modules/pkg/render"
@@ -12,8 +14,10 @@ import (
 
 const port = ":8080"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
 func main() {
-	var app config.AppConfig
 
 	tc, err := render.CreateCacheForTemplates()
 	if err != nil {
@@ -21,6 +25,15 @@ func main() {
 	}
 	app.TemplateCache = tc
 	app.UseCache = false
+	app.InProduction = false
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = app.InProduction
+
+	app.Session = session
 
 	render.NewTemplates(&app)
 
